@@ -1,9 +1,7 @@
 package com.bull.proxy.echo;
 
 import com.bull.proxy.utils.Counter;
-import com.bull.proxy.utils.CounterRepository;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
