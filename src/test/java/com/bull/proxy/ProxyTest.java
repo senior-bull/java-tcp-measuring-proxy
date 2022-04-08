@@ -1,2 +1,6 @@
-package com.bull.proxy;public class ProxyTest {
+package com.bull.proxy;
+
+public class ProxyTest {
+
+
 }

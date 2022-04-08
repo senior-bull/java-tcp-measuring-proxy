@@ -50,6 +50,7 @@ public class ProxyFrontendHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
         ByteBuf buf = (ByteBuf) msg;
+        System.out.println(buf.readableBytes() + "/" + buf.writableBytes());
         if (outboundChannel.isActive()) {
             outboundChannel.writeAndFlush(buf).addListener(new ChannelFutureListener() {
                 @Override
