@@ -1,20 +1,20 @@
 package com.bull.proxy;
 
+import com.bull.proxy.utils.ByteCounter;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 public class ProxyBackendHandler extends ChannelInboundHandlerAdapter {
 
     private final Channel inboundChannel;
-    private final AtomicLong bytesRead = new AtomicLong(0L);
+    private final ByteCounter inBytesByteCounter;
 
-    public ProxyBackendHandler(Channel inboundChannel) {
+    public ProxyBackendHandler(Channel inboundChannel, ByteCounter byteCounter) {
         this.inboundChannel = inboundChannel;
+        this.inBytesByteCounter = byteCounter;
     }
 
     @Override
@@ -22,8 +22,8 @@ public class ProxyBackendHandler extends ChannelInboundHandlerAdapter {
         ctx.read();
     }
 
-    public AtomicLong getBytesRead() {
-        return bytesRead;
+    public ByteCounter getCounters() {
+        return inBytesByteCounter;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class ProxyBackendHandler extends ChannelInboundHandlerAdapter {
         inboundChannel.writeAndFlush(buf).addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
                 ctx.channel().read();
-                bytesRead.addAndGet(bytes);
+                inBytesByteCounter.add(bytes);
             } else {
                 future.channel().close();
             }

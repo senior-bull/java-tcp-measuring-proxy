@@ -5,24 +5,29 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
-import java.util.concurrent.CompletableFuture;
-
 public class EchoClientHandler extends ChannelInboundHandlerAdapter {
 
-    private final ByteBuf firstMessage;
-    private final CompletableFuture<Boolean> readFuture = new CompletableFuture<>();
+    private final int messageSize;
+    private final int messageCount;
 
-    public EchoClientHandler(int messageByteSize) {
-        firstMessage = Unpooled.buffer(messageByteSize);
-        for (int i = 0; i < firstMessage.capacity(); i ++) {
-            firstMessage.writeByte((byte) i);
+    public EchoClientHandler(int messageByteSize, int messageCount) {
+        this.messageSize = messageByteSize;
+        this.messageCount = messageCount;
+    }
+
+    private ByteBuf generateMessage() {
+        ByteBuf message = Unpooled.buffer(messageSize);
+        for (int i = 0; i < message.capacity(); i ++) {
+            message.writeByte((byte) i);
         }
+        return message;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        ctx.writeAndFlush(firstMessage);
-        readFuture.complete(true);
+        for (int i = 0; i < messageCount; i++) {
+            ctx.writeAndFlush(generateMessage());
+        }
     }
 
     @Override

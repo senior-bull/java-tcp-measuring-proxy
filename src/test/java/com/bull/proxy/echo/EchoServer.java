@@ -1,6 +1,7 @@
 package com.bull.proxy.echo;
 
-import com.bull.proxy.utils.Counter;
+import com.bull.proxy.utils.ByteCounter;
+import com.bull.proxy.utils.ByteCounterListener;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -16,14 +17,14 @@ import io.netty.handler.logging.LoggingHandler;
 public final class EchoServer implements AutoCloseable {
 
     private final int port;
-    private final Counter counter;
+    private final ByteCounter byteCounter;
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
     public EchoServer(int port) {
         this.port = port;
-        this.counter = new Counter("EchoServer-" + port);
+        this.byteCounter = new ByteCounter("EchoServer-" + port, ByteCounterListener.EMPTY);
         start();
     }
 
@@ -40,7 +41,7 @@ public final class EchoServer implements AutoCloseable {
                     public void initChannel(SocketChannel ch) {
                         ChannelPipeline p = ch.pipeline();
                         p.addLast(new LoggingHandler(LogLevel.INFO));
-                        p.addLast(new EchoServerHandler(counter));
+                        p.addLast(new EchoServerHandler(byteCounter));
                     }
                 });
 
@@ -56,11 +57,16 @@ public final class EchoServer implements AutoCloseable {
     }
 
     public long getBytesProcessed() {
-        return counter.get();
+        return byteCounter.get();
     }
 
     public void close() {
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        EchoServer echoServer = new EchoServer(8007);
+        Thread.sleep(50000000L);
     }
 }

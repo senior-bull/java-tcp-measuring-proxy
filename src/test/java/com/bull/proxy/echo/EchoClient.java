@@ -14,14 +14,16 @@ public final class EchoClient {
     private final String host = "127.0.0.1";
     private final int port;
     private final int messageSize;
+    private final int messageCount;
 
-    public EchoClient(int port, int messageSize) {
+    public EchoClient(int port, int messageSize, int messageCount) {
         this.port = port;
         this.messageSize = messageSize;
+        this.messageCount = messageCount;
     }
 
     public void sendMessage() {
-        EchoClientHandler echoClientHandler = new EchoClientHandler(messageSize);
+        EchoClientHandler echoClientHandler = new EchoClientHandler(messageSize, messageCount);
 
         EventLoopGroup group = new NioEventLoopGroup();
         try {
@@ -49,7 +51,7 @@ public final class EchoClient {
     }
 
     public static void main(String[] args) {
-        EchoClient echoClient = new EchoClient(8007, 256);
+        EchoClient echoClient = new EchoClient(8008, 256, 10);
         echoClient.sendMessage();
     }
 }

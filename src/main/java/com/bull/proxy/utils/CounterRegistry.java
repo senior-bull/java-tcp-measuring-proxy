@@ -2,11 +2,22 @@ package com.bull.proxy.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CounterRegistry {
 
-    private final List<Counter> counters = new ArrayList<>();
+    private final List<ByteCounter> byteCounters = new ArrayList<>();
+    private final ByteCounterListener listener;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
-    public CounterRegistry() {
+    public CounterRegistry(ByteCounterListener counterListener) {
+        this.listener = counterListener;
+    }
+
+    public synchronized ByteCounter register(String name) {
+        var byteCounter = new ByteCounter(name, listener);
+        byteCounters.add(byteCounter);
+        return byteCounter;
     }
 }

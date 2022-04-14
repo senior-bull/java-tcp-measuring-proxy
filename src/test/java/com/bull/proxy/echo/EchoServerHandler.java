@@ -1,8 +1,7 @@
 package com.bull.proxy.echo;
 
-import com.bull.proxy.utils.Counter;
+import com.bull.proxy.utils.ByteCounter;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,10 +11,10 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 @Sharable
 public class EchoServerHandler extends ChannelInboundHandlerAdapter {
 
-    private final Counter counter;
+    private final ByteCounter byteCounter;
 
-    public EchoServerHandler(Counter counter) {
-        this.counter = counter;
+    public EchoServerHandler(ByteCounter byteCounter) {
+        this.byteCounter = byteCounter;
     }
 
     @Override
@@ -24,7 +23,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
         ctx.write(msg).addListener(
                 (ChannelFutureListener) channelFuture -> {
                     if (channelFuture.isSuccess()) {
-                        counter.add(bytes);
+                        byteCounter.add(bytes);
                     }
                 }
         );

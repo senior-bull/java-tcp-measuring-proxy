@@ -15,7 +15,7 @@ public class EchoClientServerTest {
 
         try (var server = new EchoServer(FreePortPicker.findAvailablePort())) {
 
-            var client = new EchoClient(server.getPort(), 256);
+            var client = new EchoClient(server.getPort(), 256, 1);
             client.sendMessage();
 
             Assertions.assertEquals(256, server.getBytesProcessed());
@@ -23,10 +23,10 @@ public class EchoClientServerTest {
 
         try (var server = new EchoServer(FreePortPicker.findAvailablePort())) {
 
-            var client = new EchoClient(server.getPort(), 1024);
+            var client = new EchoClient(server.getPort(), 256, 5);
             client.sendMessage();
 
-            Assertions.assertEquals(1024, server.getBytesProcessed());
+            Assertions.assertEquals(256 * 5, server.getBytesProcessed());
         }
     }
 }
