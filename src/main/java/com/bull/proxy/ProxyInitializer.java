@@ -11,17 +11,19 @@ public class ProxyInitializer extends ChannelInitializer<SocketChannel> {
     private final String remoteHost;
     private final int remotePort;
     private final CounterRegistry counterRegistry;
+    private final LogLevel logLevel;
 
-    public ProxyInitializer(String remoteHost, int remotePort, CounterRegistry counterRegistry) {
+    public ProxyInitializer(String remoteHost, int remotePort, CounterRegistry counterRegistry, LogLevel logLevel) {
         this.remoteHost = remoteHost;
         this.remotePort = remotePort;
         this.counterRegistry = counterRegistry;
+        this.logLevel = logLevel;
     }
 
     @Override
     public void initChannel(SocketChannel ch) {
         ch.pipeline().addLast(
-                new LoggingHandler(LogLevel.INFO),
+                new LoggingHandler(logLevel),
                 new ProxyFrontendHandler(remoteHost, remotePort, counterRegistry));
     }
 }

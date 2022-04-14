@@ -15,14 +15,16 @@ public final class Proxy implements AutoCloseable {
     private final String remoteHost;
     private final int remotePort;
     private final CounterRegistry counterRegistry;
+    private final LogLevel logLevel;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
-    public Proxy(int localPort, String remoteHost, int remotePort, CounterRegistry counterRegistry) {
+    public Proxy(int localPort, String remoteHost, int remotePort, CounterRegistry counterRegistry, LogLevel logLevel) {
         this.localPort = localPort;
         this.remoteHost = remoteHost;
         this.remotePort = remotePort;
         this.counterRegistry = counterRegistry;
+        this.logLevel = logLevel;
         start();
     }
 
@@ -32,12 +34,12 @@ public final class Proxy implements AutoCloseable {
 
         ServerBootstrap b = new ServerBootstrap();
         try {
-            b.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new ProxyInitializer(remoteHost, remotePort, counterRegistry))
-                    .childOption(ChannelOption.AUTO_READ, false)
-                    .bind(localPort).sync();
+            ServerBootstrap channel = b.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class);
+            channel = channel.handler(new LoggingHandler(logLevel))
+                    .childHandler(new ProxyInitializer(remoteHost, remotePort, counterRegistry, logLevel));
+
+            channel.childOption(ChannelOption.AUTO_READ, false).bind(localPort).sync();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
