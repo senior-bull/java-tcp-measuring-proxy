@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class CounterRegistry {
 
@@ -19,5 +20,9 @@ public class CounterRegistry {
         var byteCounter = new ByteCounter(name, listener);
         byteCounters.add(byteCounter);
         return byteCounter;
+    }
+
+    public synchronized List<String> availableCounters() {
+        return byteCounters.stream().map(ByteCounter::getName).collect(Collectors.toList());
     }
 }

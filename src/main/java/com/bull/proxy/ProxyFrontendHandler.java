@@ -1,5 +1,6 @@
 package com.bull.proxy;
 
+import com.bull.proxy.utils.ByteCounter;
 import com.bull.proxy.utils.ConnectionNameGenerator;
 import com.bull.proxy.utils.CounterRegistry;
 import io.netty.bootstrap.Bootstrap;
@@ -13,6 +14,7 @@ public class ProxyFrontendHandler extends ChannelInboundHandlerAdapter {
     private final int remotePort;
     private final CounterRegistry counterRegistry;
 
+    private ByteCounter outByteCounter;
     private Channel outboundChannel;
 
     public ProxyFrontendHandler(String remoteHost, int remotePort, CounterRegistry counterRegistry) {
@@ -33,6 +35,7 @@ public class ProxyFrontendHandler extends ChannelInboundHandlerAdapter {
                 .option(ChannelOption.AUTO_READ, false);
         ChannelFuture f = b.connect(remoteHost, remotePort);
         outboundChannel = f.channel();
+        outByteCounter = counterRegistry.register(ConnectionNameGenerator.getConnectionName("out", outboundChannel));
         f.addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
                 inboundChannel.read();
@@ -47,6 +50,7 @@ public class ProxyFrontendHandler extends ChannelInboundHandlerAdapter {
         ByteBuf buf = (ByteBuf) msg;
 
         if (outboundChannel.isActive()) {
+            outByteCounter.add(buf.readableBytes());
             outboundChannel.writeAndFlush(buf).addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
                     ctx.channel().read();
@@ -61,6 +65,7 @@ public class ProxyFrontendHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) {
         if (outboundChannel != null) {
             closeOnFlush(outboundChannel);
+            outByteCounter = null;
         }
     }
 

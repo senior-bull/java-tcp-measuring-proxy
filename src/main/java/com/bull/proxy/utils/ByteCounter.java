@@ -18,6 +18,10 @@ public class ByteCounter {
         counterListener.onCounterModified(this);
     }
 
+    public String getName() {
+        return name;
+    }
+
     public long get() {
         return counter.get();
     }
